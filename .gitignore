@@ -1,0 +1,15 @@
+.bundle
+db/*.sqlite3
+log/*.log
+tmp/**/*
+.DS_Store
+.idea
+._*
+.~*
+*.iml
+pkg
+*.gemspec
+*.gem
+.gem
+*.lock
+*.swp
