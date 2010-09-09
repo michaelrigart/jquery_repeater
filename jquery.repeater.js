@@ -1,7 +1,7 @@
 /**
  * jQuery Form repeater
  * Version 0.5 - 09/09/2010
- * @author Michaël Rigart 
+ * @author MichaÃ«l Rigart 
  *
  * This package is distributed under the AGPL license.
  *
@@ -215,7 +215,7 @@
 		        container.append(entry);
 
 		        // Handling some callback after creation
-		        settings.afterAdd[block.attr('id')].call(this, entry, rowId, options)
+		        if(settings.afterAdd[block.attr('id')]) settings.afterAdd[block.attr('id')].call(this, entry, rowId, options);
 			}
   
 		});  
