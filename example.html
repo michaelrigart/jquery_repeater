@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" lang="nl"> 
+    <head> 
+        <title>jQuery repeater plugin example</title>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script> 
+        <script type="text/javascript" src="jquery.repeater.js"></script> 
+    </head>
+    <body>
+	    <table class="repeater" id="relatedDocuments">
+		    <thead>
+			    <tr>
+				    <th><a href="javascript:void(0)" class="addRecord">Toevoegen</a></th>
+					<th>&nbsp;</th>
+					<th>&nbsp;</th>
+					<th>&nbsp;</th>
+				</tr>
+			</thead>
+			<tbody class="repeatedElement">
+			    <tr>
+				    <td>
+					    <input type="hidden" name="related_documents[#{id}][id]" />
+						<input type="hidden" name="related_documents[#{id}][position]" />
+						<input type="file" name="related_documents[#{id}][file]" />	
+					</td>
+					<td>
+						<span class="attr" name="related_documents[#{id}][filename]"></span>
+					</td>
+					<td>
+						<input class="attr" type="text" name="releated_documents[#{id}][name]" />
+					</td>
+					<td>
+						<a href="javascript:void(0)" class="up">UP</a> - 
+						<a href="javascript:void(0)" class="down">DOWN</a> -
+						<input class="delete" type="hidden" name="related_documents[#{id}][destroy]" value="0" />
+						<a href="javascript:void(0)" class="del">delete</a>
+					</td>
+				</tr>				
+			</tbody>
+        </table>
+
+
+        <script type="text/javascript">
+            $(document).ready(function() {
+	            function alertMe(entry, rowId, options){
+		            console.log(entry);
+		            console.log(rowId);
+		            console.log(options);
+	            }
+
+	
+	            $('.repeater').repeater({
+    	                prefix: 'id',
+    	                removeClass: 'del',
+    	                addClass: 'addRecord',
+    	                repeatingClass: 'repeatedElement',
+    	                deletesContainer: false,
+    	                afterAdd: {'relatedDocuments' : alertMe} 
+	                }, 
+	                {'relatedDocuments' : [{'id':'100', 'filename' : 'louike.jpg', 'name' : 'louikes bestand'},{'id':'100', 'filename' : 'albert.jpg', 'name' : 'alberts bestand'}]}
+	            );
+            })
+        </script>
+    </body>
+</html>
