@@ -1,7 +1,7 @@
 /**
  * jQuery Form repeater
  * Version 0.5 - 09/09/2010
- * @author Micha‘l Rigart 
+ * @author Michaël Rigart 
  *
  * This package is distributed under the AGPL license.
  *
