@@ -199,12 +199,12 @@
 		                    break;
 		                    case "SPAN":
 		                        if (element.attr('name')){
-		                            element.innerHTML = options[attr];
+		                            element.html(options[attr]);
 		                        }
 		                    break;
 		                    case "TEXTAREA":
 		                        if(element.attr('name')){
-		                            input.innerHTML = options[attr];
+		                            input.html(options[attr]);
 		                        }
 		                    break;
 		                }          

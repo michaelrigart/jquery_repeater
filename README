@@ -6,8 +6,12 @@
     Pritty straight forward don't you think. 
 
 == Roadmap
+    2010-09-11: Bugfix to set data in textarea or span
 
-    
+    xxxx-xx-xx: Testing on diffrent browsers
+    xxxx-xx-xx: Testing on multiple repeating elements
+    xxxx-xx-xx: Testing on multiple nested elements
+        
 
 
 == Installation
