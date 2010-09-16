@@ -59,166 +59,166 @@
 	        	});
 	        }
 	        
-			if(values[block.attr('id')]){
-				for (var i = 0; i < values[block.attr('id')].length; i++) {
-					add(values[block.attr('id')][i]);
-				}
-			}
+            if(values[block.attr('id')]){
+                for (var i = 0; i < values[block.attr('id')].length; i++) {
+                    add(values[block.attr('id')][i]);
+                }
+            }
 			
-			function add(options) {
-		        if (settings.maxRows != -1 && settings.maxRows <= settings.count) {
-		            return;
-		        }
+            function add(options) {
+                if (settings.maxRows != -1 && settings.maxRows <= settings.count) {
+                    return;
+                }
 		        
-		        // determine row id
-		        var rowId = settings.ID++;
-		        settings.count++;
+                // determine row id
+                var rowId = settings.ID++;
+                settings.count++;
 
-		        // prepare the new entry by cloning the dummy
-		        var entry = settings.entry.clone(true);
+                // prepare the new entry by cloning the dummy
+                var entry = settings.entry.clone(true);
 		        
 
-		        // replace the prefix for all id's and names
-		        entry.id = entry.attr('id').replace("#{" + settings.prefix + "}", rowId);
+                // replace the prefix for all id's and names
+                entry.id = entry.attr('id').replace("#{" + settings.prefix + "}", rowId);
 		        
-		        entry.find('*').each(function(){
-		        	var element = $(this);
+                entry.find('*').each(function(){
+                    var element = $(this);
 		        	
-		            if (element.attr('id')) {
-		                element.id = element.attr('id').replace("#{" + settings.prefix + "}", rowId);
-		            }
-		            if (element.attr('name')) {
-		                element.attr('name', element.attr('name').replace("#{" + settings.prefix + "}", rowId));
-		            }
-		            if (element.attr('for')) {
-		                element.attr('for', element.attr('for').replace("#{" + settings.prefix + "}", rowId));
-		            }
-		            element.className = element.attr('class').replace("#{" + settings.prefix + "}", rowId);        	
-		        });
-		        
-		        
-		        // set the position. Good to order items in a list
+                    if (element.attr('id')) {
+                        element.id = element.attr('id').replace("#{" + settings.prefix + "}", rowId);
+                    }
+                    if (element.attr('name')) {
+                        element.attr('name', element.attr('name').replace("#{" + settings.prefix + "}", rowId));
+                    }
+                    if (element.attr('for')) {
+                        element.attr('for', element.attr('for').replace("#{" + settings.prefix + "}", rowId));
+                    }
+                    element.className = element.attr('class').replace("#{" + settings.prefix + "}", rowId);        	
+                });
+
+   
+                // set the position. Good to order items in a list
                 entry.find('.' + settings.positionClass + ':first').val(rowId);
 
-		        // add the delete functionality
+                // add the delete functionality
                 entry.find('.' + settings.removeClass + ':first').bind('click', function(evt){ 
-		        	evt.preventDefault();
-		        	evt.stopPropagation();
+                    evt.preventDefault();
+                    evt.stopPropagation();
 
-	                if (settings.count > settings.minRows) {
-	                    if(settings.deletesContainer){
-	                        entry.remove();
-	                        settings.count--;
-	                        settings.afterDelete(rowId);
-	                    }else{
-	                        $.each(entry.find(".delete"), function(index, input){ $(input).val(1) });
-	                        entry.hide();
-	                    }
-	                }		        	
-		        });
+                    if (settings.count > settings.minRows) {
+                        if(settings.deletesContainer){
+                            entry.remove();
+                            settings.count--;
+                            settings.afterDelete(rowId);
+                        }else{
+                            $.each(entry.find(".delete"), function(index, input){ $(input).val(1) });
+                            entry.hide();
+                        }
+                    }		        	
+                });
 		        
-		        // up node
-		        entry.find('.' + settings.upClass + ':first').bind('click', function(evt){ 
-	        		var prev = entry.prev();
+                // up node
+                entry.find('.' + settings.upClass + ':first').bind('click', function(evt){ 
+                    var prev = entry.prev();
 
-	        		if (prev.get(0)) {
-	        			entry.get(0).parentNode.removeChild(entry.get(0));
-	        			prev.get(0).parentNode.insertBefore(entry.get(0), prev.get(0));
+                    if (prev.get(0)) {
+                        entry.get(0).parentNode.removeChild(entry.get(0));
+                        prev.get(0).parentNode.insertBefore(entry.get(0), prev.get(0));
 
-	        			var prevId = -1;
-	        			var nextId = -1;
+                        var prevId = -1;
+                        var nextId = -1;
 
-	        			prevId = prev.find('.' + settings.positionClass + ':first').val();
+                        prevId = prev.find('.' + settings.positionClass + ':first').val();
 
-	        			var element = entry.find('.' + settings.positionClass + ':first');
-	        			nextId = element.val();
-	        			element.val(prevId);
+                        var element = entry.find('.' + settings.positionClass + ':first');
+                        nextId = element.val();
+                        element.val(prevId);
 
-	        			prev.find('.' + settings.positionClass + ':first').val(nextId);
-	        		}		        	
-		        });
+                        prev.find('.' + settings.positionClass + ':first').val(nextId);
+                    }		        	
+                });
 		        
-		        // down node
-		        entry.find('.' + settings.downClass + ':first').bind('click', function(evt){ 
-	                var next = entry.next();
+                // down node
+                entry.find('.' + settings.downClass + ':first').bind('click', function(evt){ 
+                    var next = entry.next();
 
-	                if (next.get(0)) {
-	                    next.get(0).parentNode.removeChild(next.get(0));
-	                    entry.get(0).parentNode.insertBefore(next.get(0), entry.get(0));
+                    if (next.get(0)) {
+                        next.get(0).parentNode.removeChild(next.get(0));
+                        entry.get(0).parentNode.insertBefore(next.get(0), entry.get(0));
 
-	                    var prevId = -1;
-	                    var nextId = -1;
+                        var prevId = -1;
+                        var nextId = -1;
 
-	                    nextId = next.find('.' + settings.positionClass + ':first').val();
+                        nextId = next.find('.' + settings.positionClass + ':first').val();
 
-	                    var element = entry.find('.' + settings.positionClass + ':first');
-	                    prevId = element.val();
-	                    element.val(nextId);
+                        var element = entry.find('.' + settings.positionClass + ':first');
+                        prevId = element.val();
+                        element.val(nextId);
 
-	                    next.find('.' + settings.positionClass + ':first').val(prevId);
-	                }
-		        });		        
+                        next.find('.' + settings.positionClass + ':first').val(prevId);
+                    }
+                });		        
   
-		        
-		        // set values if they are given
-		        if(options) {
-		        	entry.find('.attr').each(function(){
-		        		var element = $(this);
-		                var attr = element.attr('name').substring(element.attr('name').lastIndexOf('[') + 1, element.attr('name').length - 1);
+		    
+                // set values if they are given
+                if(options) {
+                    entry.find('.attr').each(function(){
+                        var element = $(this);
+                        var attr = element.attr('name').substring(element.attr('name').lastIndexOf('[') + 1, element.attr('name').length - 1);
 		              
-		                switch(this.tagName.toUpperCase()){
-		                    case "INPUT":
-		                        switch(this.type){
-		                            case "text":
-		                            case "hidden":
-		                                if (element.attr('name')) {
-		                                	element.val(options[attr]);
-		                                }
-		                            break;
-		                            case "checkbox":
-		                                if(element.attr('name')){
-		                                	element.checked = options[attr];
-		                                }
-		                            break;
-		                        }
+                        switch(this.tagName.toUpperCase()){
+                            case "INPUT":
+                                switch(this.type){
+                                    case "text":
+                                    case "hidden":
+                                        if (element.attr('name')) {
+                                            element.val(options[attr]);
+                                        }
+                                    break;
+                                    case "checkbox":
+                                        if(element.attr('name')){
+                                            element.checked = options[attr];
+                                        }
+                                    break;
+                                }
                             break;
-		                    case "SELECT":
-		                        if (element.attr('name')){
-		                            var select_options = element.children();
-		                            var len = select_options.length;
-		                            for (var i = 0; i < len; i++) {     
-		                                if(select_options[i].value == options[attr]){
-		                                    select_options[i].selected = true;
-		                                }
-		                            }
-		                        }
-		                    break;
-		                    case "IMG":
-		                        if (element.attr('name')){
-		                            input.src = options[attr];
-		                        }
-		                    break;
-		                    case "SPAN":
-		                        if (element.attr('name')){
-		                            element.html(options[attr]);
-		                        }
-		                    break;
-		                    case "TEXTAREA":
-		                        if(element.attr('name')){
-		                            input.html(options[attr]);
-		                        }
-		                    break;
-		                }          
-		            });
-		        }
+                            case "SELECT":
+                                if (element.attr('name')){
+                                    var select_options = element.children();
+                                    var len = select_options.length;
+                                    for (var i = 0; i < len; i++) {     
+                                        if(select_options[i].value == options[attr]){
+                                            select_options[i].selected = true;
+                                        }
+                                    }
+                                }
+                            break;
+                            case "IMG":
+                                if (element.attr('name')){
+                                    input.src = options[attr];
+                                }
+                            break;
+                            case "SPAN":
+                                if (element.attr('name')){
+                                    element.html(options[attr]);
+                                }
+                            break;
+                            case "TEXTAREA":
+                                if(element.attr('name')){
+                                    input.html(options[attr]);
+                                }
+                            break;
+                        }          
+                    });
+                }
 
-		        // Add entry to DOM
-		        container.append(entry);
+                // Add entry to DOM
+                container.append(entry);
 
-		        // Handling some callback after creation
-		        if(settings.afterAdd[block.attr('id')]) settings.afterAdd[block.attr('id')].call(this, entry, rowId, options);
-			}
+                // Handling some callback after creation
+                if(settings.afterAdd[block.attr('id')]) settings.afterAdd[block.attr('id')].call(this, entry, rowId, options);
+            }
   
-		});  
-	};  
+        });  
+    };  
 })(jQuery);
