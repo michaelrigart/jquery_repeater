@@ -46,10 +46,10 @@
 	        var container = block.find('.' + settings.repeatingClass +':first');
 	        settings.entry = container.find('tr:first');
 
-	        // verwijder de dummy
+	        // remove the dummy entry
 	        settings.entry.remove();	
 
-	        // voeg de listener toe om elementen toe te voegen
+	        // create add listener to add elements
 	        if(options.addClass){
 	        	block.find('.' + settings.addClass + ':first').bind('click', function(evt) { 
 	    			evt.preventDefault();
@@ -70,15 +70,15 @@
 		            return;
 		        }
 		        
-		        // Bepalen row id
+		        // determine row id
 		        var rowId = settings.ID++;
 		        settings.count++;
 
-		        // voorbereiden van entry. hiervoor klonen we de dummy
+		        // prepare the new entry by cloning the dummy
 		        var entry = settings.entry.clone(true);
 		        
 
-		        // Vervang de prefix in alle id's en namen
+		        // replace the prefix for all id's and names
 		        entry.id = entry.attr('id').replace("#{" + settings.prefix + "}", rowId);
 		        
 		        entry.find('*').each(function(){
@@ -97,11 +97,11 @@
 		        });
 		        
 		        
-		        // zet de positie. Handig als ge lijsten  wil hebben dat geordend moeten worden
-		        entry.find('.' + settings.positionClass + ':first').val(rowId);
+		        // set the position. Good to order items in a list
+                entry.find('.' + settings.positionClass + ':first').val(rowId);
 
-		        // Maak de delete functionaliteit
-		        entry.find('.' + settings.removeClass + ':first').bind('click', function(evt){ 
+		        // add the delete functionality
+                entry.find('.' + settings.removeClass + ':first').bind('click', function(evt){ 
 		        	evt.preventDefault();
 		        	evt.stopPropagation();
 
@@ -160,13 +160,13 @@
 		        });		        
   
 		        
-		        // Values zetten indien mogelijk
+		        // set values if they are given
 		        if(options) {
 		        	entry.find('.attr').each(function(){
 		        		var element = $(this);
 		                var attr = element.attr('name').substring(element.attr('name').lastIndexOf('[') + 1, element.attr('name').length - 1);
 		              
-		                switch(this.tagName){
+		                switch(this.tagName.toUpperCase()){
 		                    case "INPUT":
 		                        switch(this.type){
 		                            case "text":
@@ -181,6 +181,7 @@
 		                                }
 		                            break;
 		                        }
+                            break;
 		                    case "SELECT":
 		                        if (element.attr('name')){
 		                            var select_options = element.children();
