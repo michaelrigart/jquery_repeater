@@ -1,224 +1,226 @@
 /**
  * jQuery Form repeater
  * Version 0.5 - 09/09/2010
- * @author Michaël Rigart 
+ * Version 0.6 - 14/02/2011
+ *
+ * @author Michaël Rigart
+ * @author Stefaan Colman
  *
  * This package is distributed under the AGPL license.
- *
- *
- *
- **/
+ */
 
+(function($) {
+    var DEFAULTS = {
+        prefix:           'row_id',
+        afterAdd:         function () {},
+        afterDelete:      function () {},
+        removeClass:      'delete',
+        addClass:         'add',
+        upClass:          'up',
+        downClass:        'down',
+        positionClass:    'position',
+        minRows:          0,
+        maxRows:          -1,
+        minRowsMessage:   false,
+        maxRowsMessage:   false,
+        alerter:          alert
+    };
 
-(function($){  
-	$.fn.repeater = function(options, values) {
-		      
-		var defaults = {
-		    ID: 0,
-		    count: 0,
-			prefix: options.prefix || 'row_id',
-		    afterAdd: options.afterAdd || function () {},
-		    afterDelete: options.afterDelete || function () {},
-		    removeClass: options.removeClass || 'delete',
-		    repeatingClass: options.repeatingClass || 'repeating',
-		    addClass: options.addClass || 'add',
-		    upClass: options.upClass || 'up',
-		    downClass: options.downClass || 'down',
-		    positionClass: options.positionId || 'position',
-		    minRows: options.minRows || 0,
-		    maxRows: options.maxRows || -1,
-		    str: options.str || false,
-		    deletesContainer: (options.deletesContainer != undefined)? options.deletesContainer : true		
-		}
-		
-		
-		var settings = $.extend(defaults);
-		var values = $.extend(values);
-		
-		// loop all elements
-		return this.each(function() {
-			
-	        /**
-	         * retrieve the dom element that holds data like link and model name
-	         * retrieve the dom element that needs duplication
-	         */ 
-	        var block = $(this);
-	        var container = block.find('.' + settings.repeatingClass +':first');
-	        settings.entry = container.find('tr:first');
+    /**
+     *
+     * @param options Hash containing
+     * @param objects
+     */
+    $.fn.repeater = function(options, objects) {
+        var settings = $.extend(true, {}, DEFAULTS, options);
 
-	        // remove the dummy entry
-	        settings.entry.remove();	
+        var container = this.get(0);
+        if (container) {
+            var repeater = new FormRepeater(container, settings);
+            if (objects) {
+                $.each(objects, function (i, object) {
+                    repeater.add(object);
+                });
+            }
+            return repeater;
+        }
+        else {
+            throw 'No repeating container found!';
+        }
 
-	        // create add listener to add elements
-	        if(options.addClass){
-	        	block.find('.' + settings.addClass + ':first').bind('click', function(evt) { 
-	    			evt.preventDefault();
-	            	evt.stopPropagation();
-	                add();
-	                            			
-	        	});
-	        }
-	        
-            if(values[block.attr('id')]){
-                for (var i = 0; i < values[block.attr('id')].length; i++) {
-                    add(values[block.attr('id')][i]);
+    };
+
+    function nestedProperty (hash, property) {
+        var parts  = property.split('.');
+        var parent = hash;
+
+        for (var i = 0; i < parts.length - 1; i++) {
+            parent = parent[parts[i]];
+            if (! parent) {
+                return undefined;
+            }
+        }
+
+        return parent[parts[parts.length - 1]];
+    }
+
+    function gsub (str, source, target) {
+        while(str.indexOf(source) >= 0) {
+            str = str.replace(source, target);
+        }
+        return str;
+    }
+
+    var FormRepeater = function (container, options) {
+        this.container = container;
+        this.entry     = $(container).children().get(0);
+
+        // Configuration
+        this.prefix         = options.prefix;
+        this.afterAdd       = options.afterAdd;
+        this.afterDelete    = options.afterDelete;
+
+        this.removeClass    = options.removeClass;
+        this.upClass        = options.upClass;
+        this.downClass      = options.downClass;
+        this.positionClass  = options.positionClass;
+
+        this.minRows        = options.minRows;
+        this.minRowsMessage = options.minRowsMessage;
+        this.maxRows        = options.maxRows;
+        this.maxRowsMessage = options.maxRowsMessage;
+        this.alerter        = options.alerter;
+
+        this.currentId      = 0;
+        this.count          = 0;
+
+        // Remove all children from container
+        this.container.innerHTML = '';
+
+        var repeater = this;
+        $('.' + options.addClass).click(function() {
+            repeater.add();
+        });
+    };
+
+    FormRepeater.prototype.add = function (object) {
+        // Did we reach max?
+        if (this.count == this.maxRows) {
+            if (this.maxRowsMessage) {
+                this.alerter.call(null, this.maxRowsMessage);
+            }
+            return;
+        }
+
+        var repeater = this;
+        // Create the entry
+        var rowId = this.currentId++;
+        var entry = this.entry.cloneNode(true);
+        this.count++;
+
+        // Replace the prefix with rowId
+        $(entry).find('[id],[name],[for]').each(function(i, elem) {
+            $.each(['id', 'name', 'for'], function (j, attr) {
+                var attrValue = $(elem).attr(attr);
+                if (attrValue) {
+                    attrValue = gsub(attrValue, "#{" + repeater.prefix + "}", rowId);
+                    $(elem).attr(attr, attrValue);
+                }
+            });
+        });
+
+        // Deleting
+        $(entry).find('.' + this.removeClass).click(function() {
+            if (repeater.count >  repeater.minRows) {
+                repeater.count--;
+                $(entry).remove();
+                repeater.afterDelete();
+            }
+            else {
+                // Can't delete
+                if (repeater.minRowsMessage) {
+                    repeater.alerter.call(null, repeater.minRowsMessage);
                 }
             }
-			
-            function add(options) {
-                if (settings.maxRows != -1 && settings.maxRows <= settings.count) {
-                    return;
+
+        });
+
+        // Positioning
+        $(entry).find('.' + this.upClass).click(function() {
+            repeater.up(entry);
+        });
+        $(entry).find('.' + this.downClass).click(function() {
+            repeater.down(entry);
+        });
+        $(entry).find('.' + this.positionClass).val(rowId);
+
+        // Do we add existing object?
+        if (object) {
+            $(entry).find('[data-val]').each(function (i, elem) {
+                var attr  = $(elem).attr('data-val');
+                var value = nestedProperty(object, attr);
+                if (value !== undefined) {
+                    switch (elem.nodeName.toLowerCase()) {
+                        case 'input':
+                            var type = $(elem).attr('type').toLowerCase();
+                            if (type == 'checkbox' || type == 'radio') {
+                                elem.checked = value === true || elem.value == value;
+                            }
+                            else {
+                                elem.value = value;
+                            }
+
+                            break;
+                        case 'select':
+                        case 'textarea':
+                            elem.value = value;
+                            break;
+                        default:
+                            if (elem.childNodes.length > 0) {
+                                if (elem.firstChild.nodeName == "#text") {
+                                    elem.firstChild.data =  value;
+                                }
+                            }
+                            else {
+                                elem.appendChild(document.createTextNode(value));
+                            }
+                    }
                 }
-		        
-                // determine row id
-                var rowId = settings.ID++;
-                settings.count++;
+            });
+        }
 
-                // prepare the new entry by cloning the dummy
-                var entry = settings.entry.clone(true);
-		        
+        // Add it in the flow
+        this.container.appendChild(entry);
 
-                // replace the prefix for all id's and names
-                entry.id = entry.attr('id').replace("#{" + settings.prefix + "}", rowId);
-		        
-                entry.find('*').each(function(){
-                    var element = $(this);
-		        	
-                    if (element.attr('id')) {
-                        element.id = element.attr('id').replace("#{" + settings.prefix + "}", rowId);
-                    }
-                    if (element.attr('name')) {
-                        element.attr('name', element.attr('name').replace("#{" + settings.prefix + "}", rowId));
-                    }
-                    if (element.attr('for')) {
-                        element.attr('for', element.attr('for').replace("#{" + settings.prefix + "}", rowId));
-                    }
-                    element.className = element.attr('class').replace("#{" + settings.prefix + "}", rowId);        	
-                });
+        this.afterAdd(entry, rowId, object);
+    };
 
-   
-                // set the position. Good to order items in a list
-                entry.find('.' + settings.positionClass + ':first').val(rowId);
+    FormRepeater.prototype.up = function (elem) {
+        var prev = $(elem).prev().get(0);
+        if (prev) {
+            // Switch position value
+            var tmpPos = $(elem).find('.' + this.positionClass).val();
+            $(elem).find('.' + this.positionClass).val($(prev).find('.' + this.positionClass).val());
+            $(prev).find('.' + this.positionClass).val(tmpPos);
 
-                // add the delete functionality
-                entry.find('.' + settings.removeClass + ':first').bind('click', function(evt){ 
-                    evt.preventDefault();
-                    evt.stopPropagation();
+            // Now switch them
+            $(elem).remove();
+            prev.parentNode.insertBefore(elem, prev);
+        }
+    };
 
-                    if (settings.count > settings.minRows) {
-                        if(settings.deletesContainer){
-                            entry.remove();
-                            settings.count--;
-                            settings.afterDelete(rowId);
-                        }else{
-                            $.each(entry.find(".delete"), function(index, input){ $(input).val(1) });
-                            entry.hide();
-                        }
-                    }		        	
-                });
-		        
-                // up node
-                entry.find('.' + settings.upClass + ':first').bind('click', function(evt){ 
-                    var prev = entry.prev();
+    FormRepeater.prototype.down = function (elem) {
+        var next = $(elem).next().get(0);
+        if (next) {
+            // Switch position value
+            var tmpPos = $(elem).children('.' + this.positionClass).val();
+            $(elem).children('.' + this.positionClass).val($(next).children('.' + this.positionClass).val());
+            $(next).children('.' + this.positionClass).val(tmpPos);
 
-                    if (prev.get(0)) {
-                        entry.get(0).parentNode.removeChild(entry.get(0));
-                        prev.get(0).parentNode.insertBefore(entry.get(0), prev.get(0));
+            // Now switch them
+            $(next).remove();
+            elem.parentNode.insertBefore(next, elem);
+        }
+    };
 
-                        var prevId = -1;
-                        var nextId = -1;
-
-                        prevId = prev.find('.' + settings.positionClass + ':first').val();
-
-                        var element = entry.find('.' + settings.positionClass + ':first');
-                        nextId = element.val();
-                        element.val(prevId);
-
-                        prev.find('.' + settings.positionClass + ':first').val(nextId);
-                    }		        	
-                });
-		        
-                // down node
-                entry.find('.' + settings.downClass + ':first').bind('click', function(evt){ 
-                    var next = entry.next();
-
-                    if (next.get(0)) {
-                        next.get(0).parentNode.removeChild(next.get(0));
-                        entry.get(0).parentNode.insertBefore(next.get(0), entry.get(0));
-
-                        var prevId = -1;
-                        var nextId = -1;
-
-                        nextId = next.find('.' + settings.positionClass + ':first').val();
-
-                        var element = entry.find('.' + settings.positionClass + ':first');
-                        prevId = element.val();
-                        element.val(nextId);
-
-                        next.find('.' + settings.positionClass + ':first').val(prevId);
-                    }
-                });		        
-  
-		    
-                // set values if they are given
-                if(options) {
-                    entry.find('.attr').each(function(){
-                        var element = $(this);
-                        var attr = element.attr('name').substring(element.attr('name').lastIndexOf('[') + 1, element.attr('name').length - 1);
-		              
-                        switch(this.tagName.toUpperCase()){
-                            case "INPUT":
-                                switch(this.type){
-                                    case "text":
-                                    case "hidden":
-                                        if (element.attr('name')) {
-                                            element.val(options[attr]);
-                                        }
-                                    break;
-                                    case "checkbox":
-                                        if(element.attr('name')){
-                                            element.checked = options[attr];
-                                        }
-                                    break;
-                                }
-                            break;
-                            case "SELECT":
-                                if (element.attr('name')){
-                                    var select_options = element.children();
-                                    var len = select_options.length;
-                                    for (var i = 0; i < len; i++) {     
-                                        if(select_options[i].value == options[attr]){
-                                            select_options[i].selected = true;
-                                        }
-                                    }
-                                }
-                            break;
-                            case "IMG":
-                                if (element.attr('name')){
-                                    input.src = options[attr];
-                                }
-                            break;
-                            case "SPAN":
-                                if (element.attr('name')){
-                                    element.html(options[attr]);
-                                }
-                            break;
-                            case "TEXTAREA":
-                                if(element.attr('name')){
-                                    input.html(options[attr]);
-                                }
-                            break;
-                        }          
-                    });
-                }
-
-                // Add entry to DOM
-                container.append(entry);
-
-                // Handling some callback after creation
-                if(settings.afterAdd[block.attr('id')]) settings.afterAdd[block.attr('id')].call(this, entry, rowId, options);
-            }
-  
-        });  
-    };  
 })(jQuery);
