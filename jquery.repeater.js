@@ -64,9 +64,11 @@
         return parent[parts[parts.length - 1]];
     }
 
-    function gsub (str, source, target) {
-        while(str.indexOf(source) >= 0) {
-            str = str.replace(source, target);
+    function gsub (str, pattern, replacement) {
+        var idx = str.indexOf(pattern);
+        while (idx >= 0) {
+            str = str.substring(0, idx) + replacement + str.substring(idx + pattern.length);
+            idx = str.indexOf(pattern);
         }
         return str;
     }
