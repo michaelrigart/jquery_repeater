@@ -177,6 +177,9 @@
                         case 'textarea':
                             elem.value = value;
                             break;
+                        case 'img':
+                            elem.src = value;
+                            break;
                         default:
                             if (elem.childNodes.length > 0) {
                                 if (elem.firstChild.nodeName == "#text") {
